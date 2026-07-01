@@ -22,7 +22,7 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
-  console.log(`Pokédex API running on http://localhost:${port}/api`);
+  console.log(`servidor corriendo en http://localhost:${port}/api`);
 }
 
 bootstrap();
