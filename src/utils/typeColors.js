@@ -20,7 +20,8 @@ export const TYPE_NAMES_ES = {
 };
 
 export function getTypeName(type) {
-  return TYPE_NAMES_ES[type?.toLowerCase()] ?? type;
+  if (!type) return '';
+  return TYPE_NAMES_ES[type.toLowerCase()] ?? type;
 }
 
 export const TYPE_COLORS = {
