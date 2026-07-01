@@ -166,5 +166,5 @@ pokedex/
 
 **Daniel Avilar**
 
-- GitHub: [@dan1s](https://github.com/dan1s)
+- GitHub: [@DSantiagoAvila](https://github.com/DSantiagoAvila)
 - LinkedIn: [linkedin.com/in/tu-perfil](https://linkedin.com/in/tu-perfil)
