@@ -1,357 +1,170 @@
-# Pokédex Full Stack
+# Pokédex
 
-Una aplicación web completa que permite explorar, buscar y gestionar Pokémon. Combina una interfaz React moderna con una API REST construida en NestJS, autenticación JWT y una capa de caché en MongoDB para optimizar las consultas a la PokeAPI.
+Una Pokédex que construí para practicar desarrollo fullstack. El frontend consume la PokeAPI directamente y el backend maneja autenticación, favoritos y equipos con su propia base de datos en MySQL.
 
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat&logo=vite&logoColor=white)
 ![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?style=flat&logo=nestjs&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?style=flat&logo=mongodb&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES2022-F7DF1E?style=flat&logo=javascript&logoColor=black)
+![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?style=flat&logo=mysql&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white)
-![License](https://img.shields.io/badge/Licencia-MIT-green?style=flat)
 
 ---
 
-## Demo visual
+## ¿Qué hace?
 
-![Demo](./docs/demo.gif)
-
-> Agrega aquí un GIF o screenshot de la app
-
----
-
-## Características
-
-### Frontend
-- Exploración paginada de la Pokédex con carga incremental ("Cargar más")
-- Búsqueda en tiempo real con debounce de 300 ms por nombre o número de Pokémon
-- Filtrado por tipo de Pokémon (fuego, agua, planta, etc.)
-- Modal de detalle con estadísticas base, tipos, habilidades y sprites
-- Sistema de favoritos por usuario con vista dedicada
-- Gestión de equipos: crear, editar y eliminar equipos de hasta 6 Pokémon
-- Autenticación completa con formularios de registro e inicio de sesión
-- Sesión persistente mediante token almacenado en `localStorage`
-- Diseño responsivo con CSS Modules y variables de tipo
-
-### Backend
-- API REST modular construida con NestJS y arquitectura orientada a módulos
-- Autenticación mediante JWT firmado con `@nestjs/jwt` y Passport
-- Contraseñas hasheadas con bcrypt (salt factor 10) antes de persistirlas
-- Validación de entrada con `class-validator` y DTOs estrictos
-- Caché de Pokémon individuales en MongoDB para reducir llamadas externas
-- Proxy a la PokeAPI con manejo de errores y `upsert` concurrente seguro
-- Prefijo global `/api` y CORS configurado para el cliente de desarrollo
-- Pipe global de validación con `whitelist` y `forbidNonWhitelisted`
+- Muestra los Pokémon en tarjetas con imagen oficial, nombre, número y tipos en español
+- Búsqueda por nombre con debounce para no spamear la API
+- Filtros por tipo (fuego, agua, planta, etc.)
+- Modal de detalle con estadísticas, habilidades, cadena de evolución y movimientos
+- Sistema de cuentas: registro, inicio de sesión y sesión persistente
+- Guardar Pokémon favoritos por usuario
+- Crear y gestionar equipos de hasta 6 Pokémon
+- Diseño responsive para móvil, tablet y escritorio
 
 ---
 
-## Tecnologías
+## Stack
 
-| Capa | Tecnologías |
+| | Tecnología |
 |---|---|
-| **Frontend** | React 19, Vite 8, JavaScript (ES2022), CSS Modules |
-| **Backend** | NestJS, TypeScript, Passport JWT, bcrypt, class-validator, Axios |
-| **Base de datos** | MongoDB 7, Mongoose (ODM), esquemas tipados con decoradores |
-| **Herramientas** | oxlint, Node.js 18+ |
+| Frontend | React 19, Vite, JavaScript, CSS Modules |
+| Backend | NestJS, TypeScript, TypeORM, Passport JWT |
+| Base de datos | MySQL 8 |
 
 ---
 
-## Arquitectura
+## Cómo correrlo localmente
 
-```
-┌─────────────────────────────────────────────────────┐
-│                   Navegador (React)                  │
-│  AuthContext · PokedexContext · Custom Hooks         │
-│  Componentes: Navbar, PokemonCard, PokemonModal      │
-│  SearchBar, TypeFilter, AuthModal                    │
-└──────────────────────┬──────────────────────────────┘
-                       │ HTTP / Bearer JWT
-                       │ (VITE_API_URL → /api)
-┌──────────────────────▼──────────────────────────────┐
-│              NestJS API  (puerto 3000)               │
-│                                                      │
-│  /api/auth      → AuthModule   (register, login)     │
-│  /api/users     → UsersModule  (me, favorites)       │
-│  /api/teams     → TeamsModule  (CRUD de equipos)     │
-│  /api/pokemon   → PokemonModule (lista, detalle)     │
-└──────────┬──────────────────────────┬───────────────┘
-           │ Mongoose ODM             │ HTTP (Axios)
-┌──────────▼──────────┐   ┌──────────▼───────────────┐
-│      MongoDB         │   │         PokeAPI           │
-│  users · teams       │   │  pokeapi.co/api/v2        │
-│  pokemon_caches      │   │  (resultados cacheados)   │
-└──────────────────────┘   └──────────────────────────┘
-```
+### Requisitos
+- Node.js 18+
+- MySQL 8 corriendo localmente
 
----
-
-## Requisitos previos
-
-- **Node.js** 18 o superior
-- **npm** 9 o superior
-- **MongoDB** local (puerto 27017) o una cadena de conexión a MongoDB Atlas
-
----
-
-## Instalación y ejecución
-
-### 1. Clonar el repositorio
+### 1. Clonar el repo
 
 ```bash
-git clone https://github.com/[tu-usuario]/pokedex.git
+git clone https://github.com/tu-usuario/pokedex.git
 cd pokedex
 ```
 
-### 2. Configurar y ejecutar el backend
+### 2. Crear la base de datos
+
+En MySQL Workbench o tu terminal de MySQL:
+
+```sql
+CREATE DATABASE pokedex CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+### 3. Configurar y levantar el backend
 
 ```bash
 cd server
 npm install
-```
-
-Copia el archivo de variables de entorno y ajusta los valores:
-
-```bash
 cp .env.example .env
 ```
 
-Edita `server/.env` con tus valores (ver sección [Variables de entorno](#variables-de-entorno)).
+Edita `server/.env` con tus credenciales de MySQL:
 
-Inicia el servidor en modo desarrollo:
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASS=tu_contraseña
+DB_NAME=pokedex
+JWT_SECRET=cambia-esto-en-produccion
+PORT=3000
+```
 
 ```bash
 npm run start:dev
 ```
 
-El backend quedará disponible en `http://localhost:3000/api`.
+TypeORM crea las tablas automáticamente al iniciar. El backend queda en `http://localhost:3000/api`.
 
-### 3. Configurar y ejecutar el frontend
+### 4. Levantar el frontend
 
-Desde la raíz del proyecto (en una terminal nueva):
+En otra terminal, desde la raíz del proyecto:
 
 ```bash
-cd ..
 npm install
-```
-
-Crea el archivo de variables de entorno del frontend:
-
-```bash
 echo "VITE_API_URL=http://localhost:3000" > .env.local
-```
-
-Inicia el servidor de desarrollo:
-
-```bash
 npm run dev
 ```
 
-La aplicación estará disponible en `http://localhost:5173`.
+Abre `http://localhost:5173`.
 
 ---
 
 ## Variables de entorno
 
-### Backend — `server/.env`
+**`server/.env`**
 
-| Variable | Descripción | Valor por defecto |
-|---|---|---|
-| `MONGODB_URI` | URI de conexión a MongoDB | `mongodb://localhost:27017/pokedex` |
-| `JWT_SECRET` | Clave secreta para firmar los tokens JWT | `change-me-in-production` |
-| `PORT` | Puerto en el que escucha la API | `3000` |
+| Variable | Para qué sirve |
+|---|---|
+| `DB_HOST` | Host de MySQL (normalmente `localhost`) |
+| `DB_PORT` | Puerto de MySQL (por defecto `3306`) |
+| `DB_USER` | Usuario de MySQL |
+| `DB_PASS` | Contraseña de MySQL |
+| `DB_NAME` | Nombre de la base de datos |
+| `JWT_SECRET` | Clave para firmar los tokens JWT |
+| `PORT` | Puerto del servidor (por defecto `3000`) |
 
-> **Importante:** Cambia `JWT_SECRET` por una cadena aleatoria y segura antes de cualquier despliegue en producción.
+**`.env.local` (raíz)**
 
-### Frontend — `.env.local` (raíz del proyecto)
-
-| Variable | Descripción | Valor por defecto |
-|---|---|---|
-| `VITE_API_URL` | URL base de la API REST | `http://localhost:3000` |
+| Variable | Para qué sirve |
+|---|---|
+| `VITE_API_URL` | URL del backend (`http://localhost:3000`) |
 
 ---
 
-## Endpoints de la API
+## API
 
-Todos los endpoints tienen el prefijo `/api`. Los endpoints marcados como **Sí** en la columna Auth requieren el header `Authorization: Bearer <token>`.
+Todos los endpoints llevan el prefijo `/api`. Los protegidos requieren `Authorization: Bearer <token>`.
 
 | Método | Ruta | Descripción | Auth |
 |---|---|---|---|
-| `POST` | `/api/auth/register` | Registra un nuevo usuario y devuelve un JWT | No |
-| `POST` | `/api/auth/login` | Autentica credenciales y devuelve un JWT | No |
-| `GET` | `/api/users/me` | Devuelve el perfil y favoritos del usuario autenticado | Sí |
-| `POST` | `/api/users/favorites/:pokemonId` | Añade un Pokémon a la lista de favoritos | Sí |
-| `DELETE` | `/api/users/favorites/:pokemonId` | Elimina un Pokémon de la lista de favoritos | Sí |
-| `GET` | `/api/teams` | Lista todos los equipos del usuario autenticado | Sí |
-| `POST` | `/api/teams` | Crea un nuevo equipo (máx. 6 miembros) | Sí |
-| `PATCH` | `/api/teams/:id` | Actualiza el nombre o los miembros de un equipo | Sí |
-| `DELETE` | `/api/teams/:id` | Elimina un equipo por su ID | Sí |
-| `GET` | `/api/pokemon` | Lista Pokémon con paginación (`?limit=20&offset=0`) | No |
-| `GET` | `/api/pokemon/:id` | Devuelve el detalle de un Pokémon (con caché en BD) | No |
-
-### Ejemplo: registro de usuario
-
-**Request**
-```http
-POST /api/auth/register
-Content-Type: application/json
-
-{
-  "username": "ash",
-  "email": "ash@kanto.com",
-  "password": "pikachu123"
-}
-```
-
-**Response `201 Created`**
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": "6683a4f2b3c1d2e4f5a6b7c8",
-    "username": "ash",
-    "email": "ash@kanto.com"
-  }
-}
-```
+| POST | `/api/auth/register` | Crear cuenta | No |
+| POST | `/api/auth/login` | Iniciar sesión | No |
+| GET | `/api/users/me` | Ver mi perfil y favoritos | Sí |
+| POST | `/api/users/favorites/:id` | Agregar favorito | Sí |
+| DELETE | `/api/users/favorites/:id` | Quitar favorito | Sí |
+| GET | `/api/teams` | Mis equipos | Sí |
+| POST | `/api/teams` | Crear equipo | Sí |
+| PATCH | `/api/teams/:id` | Editar equipo | Sí |
+| DELETE | `/api/teams/:id` | Eliminar equipo | Sí |
+| GET | `/api/pokemon` | Lista paginada (proxy PokeAPI) | No |
+| GET | `/api/pokemon/:id` | Detalle con caché en BD | No |
 
 ---
 
-## Estructura del proyecto
+## Estructura
 
 ```
 pokedex/
-├── package.json                  # Dependencias y scripts del frontend
-├── vite.config.js                # Configuración de Vite
-├── .env.local                    # Variables de entorno del frontend (no committear)
-│
-├── src/                          # Código fuente del frontend (React)
-│   ├── main.jsx                  # Punto de entrada de React
-│   ├── App.jsx                   # Árbol raíz: providers + layout
-│   ├── App.css / index.css       # Estilos globales
-│   │
-│   ├── context/
-│   │   ├── AuthContext.jsx       # Estado global de autenticación y sesión
-│   │   └── PokedexContext.jsx    # Estado global de la Pokédex (filtros, modal)
-│   │
-│   ├── hooks/
-│   │   ├── useDebounce.js        # Debounce genérico para búsqueda
-│   │   ├── usePokemonList.js     # Carga paginada, filtrado y búsqueda
-│   │   └── usePokemonDetail.js   # Carga del detalle de un Pokémon
-│   │
+├── src/                        # Frontend React
+│   ├── components/             # Navbar, PokemonCard, SearchBar, etc.
+│   ├── context/                # AuthContext, PokedexContext
+│   ├── features/
+│   │   ├── pokedex/            # Página principal con el grid
+│   │   └── pokemon/            # Modal de detalle
+│   ├── hooks/                  # usePokemonList, usePokemonDetail, useDebounce
 │   ├── services/
-│   │   ├── api.js                # Cliente HTTP hacia la API propia (REST)
-│   │   └── pokeapi.js            # Cliente HTTP hacia la PokeAPI pública
-│   │
-│   ├── components/               # Componentes reutilizables
-│   │   ├── Navbar/
-│   │   ├── PokemonCard/
-│   │   ├── PokemonBadge/
-│   │   ├── SearchBar/
-│   │   ├── TypeFilter/
-│   │   ├── AuthModal/
-│   │   ├── LoadingSpinner/
-│   │   └── ErrorMessage/
-│   │
-│   ├── features/                 # Módulos de funcionalidad por dominio
-│   │   ├── pokedex/
-│   │   │   └── PokedexPage.jsx   # Página principal con grid de Pokémon
-│   │   └── pokemon/
-│   │       └── PokemonModal.jsx  # Modal de detalle de un Pokémon
-│   │
-│   └── utils/
-│       ├── typeColors.js         # Mapa de colores por tipo de Pokémon
-│       └── helpers.js            # Funciones utilitarias (ej. extraer ID de URL)
+│   │   ├── api.js              # Llamadas al backend propio
+│   │   └── pokeapi.js          # Llamadas a la PokeAPI
+│   └── utils/                  # Colores por tipo, helpers
 │
-└── server/                       # Código fuente del backend (NestJS)
-    ├── package.json
-    ├── tsconfig.json
-    ├── nest-cli.json
-    ├── .env.example              # Plantilla de variables de entorno
-    │
+└── server/                     # Backend NestJS
     └── src/
-        ├── main.ts               # Bootstrap de NestJS (CORS, pipes, prefijo global)
-        ├── app.module.ts         # Módulo raíz con MongoDB y módulos de dominio
-        │
-        ├── auth/                 # Módulo de autenticación
-        │   ├── auth.controller.ts
-        │   ├── auth.service.ts
-        │   ├── auth.module.ts
-        │   ├── jwt.strategy.ts
-        │   ├── jwt-auth.guard.ts
-        │   └── dto/
-        │       ├── register.dto.ts
-        │       └── login.dto.ts
-        │
-        ├── users/                # Módulo de usuarios y favoritos
-        │   ├── users.controller.ts
-        │   ├── users.service.ts
-        │   ├── users.module.ts
-        │   └── schemas/
-        │       └── user.schema.ts
-        │
-        ├── teams/                # Módulo de equipos
-        │   ├── teams.controller.ts
-        │   ├── teams.service.ts
-        │   ├── teams.module.ts
-        │   ├── dto/
-        │   │   ├── create-team.dto.ts
-        │   │   └── update-team.dto.ts
-        │   └── schemas/
-        │       └── team.schema.ts
-        │
-        └── pokemon/              # Módulo proxy + caché de PokeAPI
-            ├── pokemon.controller.ts
-            ├── pokemon.service.ts
-            ├── pokemon.module.ts
-            └── schemas/
-                └── pokemon-cache.schema.ts
+        ├── auth/               # Register, login, JWT strategy
+        ├── users/              # Perfil y favoritos
+        ├── teams/              # CRUD de equipos
+        └── pokemon/            # Proxy + caché de PokeAPI
 ```
-
----
-
-## Highlights técnicos
-
-Este proyecto fue construido como ejercicio fullstack con el objetivo de demostrar decisiones de diseño reales, no solo la integración de tecnologías.
-
-**Caché de Pokémon en MongoDB**
-El servicio `PokemonService` actúa como proxy inteligente: consulta MongoDB antes de llamar a la PokeAPI. Si el documento no existe, lo obtiene y lo persiste con `findOneAndUpdate` + `upsert: true`, lo que garantiza la correcta gestión de peticiones concurrentes sin duplicados.
-
-**Separación de contextos en el frontend**
-Se utilizaron dos contextos independientes: `AuthContext` gestiona exclusivamente el estado de sesión (token, usuario, login/logout), mientras que `PokedexContext` gestiona el estado de la UI (filtros, Pokémon seleccionado, vista de favoritos). Esta separación evita re-renders innecesarios y mantiene cada contexto con una responsabilidad única.
-
-**Custom hook `usePokemonList`**
-Centraliza la lógica de carga paginada, filtrado por tipo y búsqueda por nombre. Usa refs estables (`offsetRef`, `loadingRef`) para evitar que los callbacks `loadMore` y `retry` se recreen en cada render, garantizando que los event listeners siempre lean el estado más reciente.
-
-**Autenticación JWT sin estado**
-El backend no mantiene sesiones en base de datos. El token JWT contiene `userId`, `username` y `email` en el payload. El guard `JwtAuthGuard` valida la firma en cada petición y adjunta el usuario al objeto `Request`, sin necesidad de consultas adicionales a la base de datos.
-
-**Validación con DTOs estrictos**
-El pipe global de NestJS (`whitelist: true`, `forbidNonWhitelisted: true`) rechaza cualquier campo no declarado en los DTOs. Esto protege contra inyección de propiedades inesperadas y hace explícito el contrato de cada endpoint.
-
-**Reglas de negocio en el esquema**
-Las restricciones de dominio (máximo 100 favoritos por usuario, máximo 6 Pokémon por equipo, username entre 3 y 20 caracteres) se definen directamente en los esquemas de Mongoose con validadores declarativos, manteniendo la lógica de negocio cerca del modelo de datos.
-
----
-
-## Contribuir
-
-1. Haz un fork del repositorio.
-2. Crea una rama para tu funcionalidad: `git checkout -b feature/nombre-de-la-feature`.
-3. Realiza tus cambios y haz commit: `git commit -m "feat: descripción del cambio"`.
-4. Sube tu rama: `git push origin feature/nombre-de-la-feature`.
-5. Abre un Pull Request describiendo el cambio y su motivación.
-
----
-
-## Licencia
-
-Distribuido bajo la licencia **MIT**. Consulta el archivo `LICENSE` para más detalles.
 
 ---
 
 ## Autor
 
-**[Tu nombre]**
+**Daniel Avilar**
 
-- GitHub: [@tu-usuario](https://github.com/tu-usuario)
+- GitHub: [@dan1s](https://github.com/dan1s)
 - LinkedIn: [linkedin.com/in/tu-perfil](https://linkedin.com/in/tu-perfil)
